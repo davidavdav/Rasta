@@ -1,11 +1,13 @@
-## rasta.jl
+## Rasta.jl
 ## (c) 2013 David van Leeuwen
 ## recoded from Dan Ellis's rastamat package
 
+
+
 module Rasta
 
-## Freely adapted from Dan Ellis's rastamat matlab package.  We've kept routine names the same, but the interface has changed a bit. 
-## We don't like matlab, which is a trademark. 
+## Freely adapted from Dan Ellis's rastamat matlab (matlab is a trandemark) package.  
+## We've kept routine names the same, but the interface has changed a bit. 
 
 ## we haven't implemented rasta filtering, yet, in fact.  These routines are a minimum for 
 ## encoding HTK-style mfccs
@@ -30,17 +32,17 @@ function powspec{T<:FloatingPoint}(x::Vector{T}, sr::FloatingPoint=8000.0; winti
 end
 
 # audspec tested against octave with simple vectors for all fbtypes
-function audspec{T<:FloatingPoint}(x::Array{T}, sr::FloatingPoint=16000.0; nfilts=iceil(hz2bark(sr/2)), fbtype="bark", 
+function audspec{T<:FloatingPoint}(x::Array{T}, sr::FloatingPoint=16000.0; nfilts=iceil(hz2bark(sr/2)), fbtype=:bark, 
                  minfreq=0, maxfreq=sr/2, sumpower=true, bwidth=1.0)
     (nfreqs,nframes)=size(x)
     nfft = 2(nfreqs-1)
-    if fbtype=="bark"
+    if fbtype==:bark
         wts = fft2barkmx(nfft, nfilts, sr=sr, width=bwidth, minfreq=minfreq, maxfreq=maxfreq)
-    elseif fbtype=="mel"
+    elseif fbtype==:mel
         wts = fft2melmx(nfft, nfilts, sr=sr, width=bwidth, minfreq=minfreq, maxfreq=maxfreq)
-    elseif fbtype=="htkmel"
+    elseif fbtype==:htkmel
         wts = fft2melmx(nfft, nfilts, sr=sr, width=bwidth, minfreq=minfreq, maxfreq=maxfreq, htkmel=true, constamp=true)
-    elseif fbtype=="fcmel"
+    elseif fbtype==:fcmel
         wts = fft2melmx(nfft, nfilts, sr=sr, width=bwidth, minfreq=minfreq, maxfreq=maxfreq, htkmel=true, constamp=false)
     else
         ## error
@@ -140,14 +142,14 @@ function mel2hz{T<:Real}(z::Array{T}, htk=false)
     return f
 end
 
-function postaud{T<:FloatingPoint}(x::Array{T}, fmax::Real, fbtype="bark", broaden=false)
+function postaud{T<:FloatingPoint}(x::Array{T}, fmax::Real, fbtype=:bark, broaden=false)
     (nbands,nframes) = size(x)
     nfpts = nbands+2broaden
-    if fbtype=="bark"
+    if fbtype==:bark
         bandcfhz = bark2hz(linspace(0, hz2bark(fmax), nfpts))
-    elseif fbtype=="mel"
+    elseif fbtype==:mel
         bandcfhz = mel2hz(linspace(0, hz2mel(fmax), nfpts))
-    elseif fbtype=="htkmel" || fbtype=="fcmel"
+    elseif fbtype==:htkmel || fbtype==:fcmel
         bandcfhz = mel2hz(linspace(0, hz2mel(fmax,1), nfpts),1);
     else
         ## error
