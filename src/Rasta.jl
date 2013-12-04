@@ -45,7 +45,7 @@ function audspec{T<:FloatingPoint}(x::Array{T}, sr::FloatingPoint=16000.0; nfilt
     elseif fbtype==:fcmel
         wts = fft2melmx(nfft, nfilts, sr=sr, width=bwidth, minfreq=minfreq, maxfreq=maxfreq, htkmel=true, constamp=false)
     else
-        ## error
+        error("Unknown filtrerbank type ", fbtype)
     end
     wts = wts[:,1:nfreqs]
     if sumpower
