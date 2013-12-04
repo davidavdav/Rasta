@@ -1,8 +1,8 @@
 ## Rasta.jl
 ## (c) 2013 David van Leeuwen
-## recoded from Dan Ellis's rastamat package
+## recoded from Dan Ellis's rastamat package, which is (c) 2102 Dan Ellis (see file LICENSE)
 
-
+## Julia re-coding efforts by David van Leeuwen are licensed under the GPL v2. 
 
 module Rasta
 
