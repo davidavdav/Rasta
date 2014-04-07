@@ -91,7 +91,7 @@ function fft2melmx(nfft::Int, nfilts::Int; sr=8000.0, width=1.0, minfreq=0.0, ma
         # scale by width
         fs = fs[2] .+ (fs .- fs[2])width
         # lower and upper slopes for all bins
-        loslope = (fftfreqs - fs[1])/diff(fs[1:2])
+        loslope = (fftfreqs .- fs[1])/diff(fs[1:2])
         hislope = (fs[3] .- fftfreqs)/diff(fs[2:3])
         # then intersect them with each other and zero
         wts[i,:] = max(0, min(loslope,hislope))
