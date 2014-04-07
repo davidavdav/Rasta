@@ -25,8 +25,8 @@ function powspec{T<:FloatingPoint}(x::Vector{T}, sr::FloatingPoint=8000.0; winti
     window = hamming(nwin)      # overrule default in specgram which is hanning in Octave
     noverlap = nwin - nstep
     
-    y = abs2(specgram(x * (1<<15), nfft; sr=sr, window=window, overlap=noverlap)[1])
-    y += dither * nwin
+    y = abs2(specgram(x .* (1<<15), nfft; sr=sr, window=window, overlap=noverlap)[1])
+    y .+= dither * nwin
 
     return y
 end
@@ -83,7 +83,7 @@ function fft2melmx(nfft::Int, nfilts::Int; sr=8000.0, width=1.0, minfreq=0.0, ma
     # 'Center freqs' of mel bands - uniformly spaced between limits
     minmel = hz2mel(minfreq, htkmel); 
     maxmel = hz2mel(maxfreq, htkmel);
-    binfreqs = mel2hz(minmel+[0:(nfilts+1)]/(nfilts+1)*(maxmel-minmel), htkmel);
+    binfreqs = mel2hz(minmel .+ [0:(nfilts+1)]/(nfilts+1)*(maxmel-minmel), htkmel);
 ##    binbin = iround(binfrqs/sr*(nfft-1));
     
     for i=1:nfilts
@@ -91,7 +91,7 @@ function fft2melmx(nfft::Int, nfilts::Int; sr=8000.0, width=1.0, minfreq=0.0, ma
         # scale by width
         fs = fs[2] .+ (fs .- fs[2])width
         # lower and upper slopes for all bins
-        loslope = (fftfreqs - fs[1])/diff(fs[1:2])
+        loslope = (fftfreqs .- fs[1])/diff(fs[1:2])
         hislope = (fs[3] .- fftfreqs)/diff(fs[2:3])
         # then intersect them with each other and zero
         wts[i,:] = max(0, min(loslope,hislope))
@@ -103,7 +103,7 @@ function fft2melmx(nfft::Int, nfilts::Int; sr=8000.0, width=1.0, minfreq=0.0, ma
         wts = broadcast(*, 2 ./ ((binfreqs[3:nfilts+2]) - binfreqs[1:nfilts]), wts)
     end
     # Make sure 2nd half of DFT is zero
-    wts[:,(nfft>>1)+1:nfft] = 0
+    wts[:,(nfft>>1)+1:nfft] = 0.
     return wts
 end
 
@@ -119,7 +119,7 @@ function hz2mel{T<:Real}(f::Vector{T}, htk=false)
         linpts = f .< brkfrq
         z = zeros(size(f))      # prevent InexactError() by making these Float64
         z[find(linpts)] = f[find(linpts)]/brkfrq ./ log(logstep)
-        z[find(!linpts)] = brkpt + log(f[find(!linpts)]/brkfrq) ./ log(logstep)
+        z[find(!linpts)] = brkpt .+ log(f[find(!linpts)]/brkfrq) ./ log(logstep)
     end
     return z
 end
@@ -136,8 +136,8 @@ function mel2hz{T<:Real}(z::Array{T}, htk=false)
         logstep = exp(log(6.4)/27)
         linpts = z .< brkpt
         f = similar(z)
-        f[linpts] = f0 + fsp*z[linpts]
-        f[!linpts] = brkfrq*exp(log(logstep)*(z[!linpts] - brkpt))
+        f[linpts] = f0 .+ fsp*z[linpts]
+        f[!linpts] = brkfrq .* exp(log(logstep)*(z[!linpts] .- brkpt))
     end
     return f
 end
