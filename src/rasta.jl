@@ -1,31 +1,23 @@
-## Rasta.jl
-## (c) 2013 David van Leeuwen
-## recoded from Dan Ellis's rastamat package, which is (c) 2005--2012 Dan Ellis (see file LICENSE)
-
-## Julia re-coding efforts by David van Leeuwen are licensed under the GPL v2. 
-
-module Rasta
-
 ## Freely adapted from Dan Ellis's rastamat matlab (matlab is a trandemark) package.  
 ## We've kept routine names the same, but the interface has changed a bit. 
 
 ## we haven't implemented rasta filtering, yet, in fact.  These routines are a minimum for 
 ## encoding HTK-style mfccs
 
-export powspec, audspec, fft2barkmx, fft2melmx, hz2bark, hz2mel, mel2hz, postaud, dolpc, lpc2cep, spec2cep, lifter
-
-using SignalProcessing
-
 # powspec tested against octave with simple vectors
-function powspec{T<:FloatingPoint}(x::Vector{T}, sr::FloatingPoint=8000.0; wintime=0.025, steptime=0.01, dither=true)
+function powspec{T<:FloatingPoint}(x::Vector{T}, sr::FloatingPoint=8000.0; wintime=0.025, steptime=0.01, dither=true, method=:DSP)
     nwin = iround(wintime*sr)
     nstep = iround(steptime*sr)
 
     nfft = 1 << iceil(log2(nwin))
     window = hamming(nwin)      # overrule default in specgram which is hanning in Octave
     noverlap = nwin - nstep
-    
-    y = abs2(specgram(x .* (1<<15), nfft; sr=sr, window=window, overlap=noverlap)[1])
+
+    if method==:DSP
+        y = abs2(spectogram(x .* (1<<15), nfft, fs=sr, window=window, noverlap=noverlap)[1])
+    else
+        y = abs2(specgram(x .* (1<<15), nfft; sr=sr, window=window, overlap=noverlap)[1])
+    end
     y .+= dither * nwin
 
     return y
@@ -253,5 +245,3 @@ function lifter{T<:FloatingPoint}(x::Array{T}, lift::Real=0.6, invs=false)
     return broadcast(*, x, liftw)
 end
 
-
-end
