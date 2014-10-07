@@ -14,11 +14,13 @@ function powspec{T<:FloatingPoint}(x::Vector{T}, sr::FloatingPoint=8000.0; winti
     noverlap = nwin - nstep
 
     if method==:DSP
-        y = abs2(spectogram(x .* (1<<15), nfft, fs=sr, window=window, noverlap=noverlap)[1])
+        y = spectrogram(x .* (1<<15), nwin, noverlap, nfft=nfft, fs=sr, window=window, onesided=true).power
+        y *= sumabs2(window) * sr / 2
+        y .+= dither * nwin 
     else
         y = abs2(specgram(x .* (1<<15), nfft; sr=sr, window=window, overlap=noverlap)[1])
+        y .+= dither * nwin
     end
-    y .+= dither * nwin
 
     return y
 end
