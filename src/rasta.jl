@@ -15,11 +15,8 @@ function powspec{T<:FloatingPoint}(x::Vector{T}, sr::FloatingPoint=8000.0; winti
 
     if method==:DSP
         y = spectrogram(x .* (1<<15), nwin, noverlap, nfft=nfft, fs=sr, window=window, onesided=true).power
-        ## for compability with previous specgram method, multiply the 1st element by 2 and drop the last
-#        for i=1:size(y,2)
-#           y[1,i] *= 2
-#        end
-        y = y[1:end-1,:] * sumabs2(window) * sr / 2
+        ## for compability with previous specgram method, remove the last frequency and scale
+        y = y[1:end-1,:] ##  * sumabs2(window) * sr / 2
         y .+= dither * nwin 
     else
         y = abs2(specgram(x .* (1<<15), nfft; sr=sr, window=window, overlap=noverlap)[1])
