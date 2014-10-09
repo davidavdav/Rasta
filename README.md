@@ -1,6 +1,8 @@
 Rasta
 =====
 
+Update: the package has now been absorbed by [MFCC](https://github.com/davidavdav/MFCC.jl.git), but I'll leave it here for people who like the rastamat package port in isolation. 
+
 This module contains the main routines for MFCC and PLP extraction.  Even though it is called Rasta, rasta processing hasn't been implemented yet. 
 
 Most of this is re-coded from Dan Ellis's rastamat package.  We like Dan Ellis's work.  
